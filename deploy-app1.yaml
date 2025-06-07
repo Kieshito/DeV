@@ -1,0 +1,23 @@
+---
+- name: Развертывание Books App
+  hosts: k8s_master
+  become: yes
+  tasks:
+    - name: Удалить существующий Deployment books
+      command: microk8s kubectl delete deployment books -n lab-ns
+    - name: Создание Deployment
+      command: |
+        microk8s kubectl create deployment books \
+          --image=hashicorp/http-echo \
+          --port=8000 \
+          -n lab-ns
+    - name: Удалить существующий Service books-service
+      command: microk8s kubectl delete service books-service -n lab-ns
+    - name: Создание Service
+      command: |
+        microk8s kubectl expose deployment books \
+          --type=ClusterIP \
+          --port=80 \
+          --target-port=5678 \
+          --name=books-service \
+          -n lab-ns

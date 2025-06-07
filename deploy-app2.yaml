@@ -1,0 +1,19 @@
+---
+- name: Развертывание Nginx Hello
+  hosts: k8s_master
+  become: yes
+  tasks:
+    - name: Создание Deployment
+      command: |
+        microk8s kubectl create deployment hello \
+          --image=nginxdemos/hello:latest \
+          --port=80 \
+          -n lab-ns
+
+    - name: Создание Service
+      command: |
+        microk8s kubectl expose deployment hello \
+          --type=ClusterIP \
+          --port=80 \
+          --name=hello-service \
+          -n lab-ns

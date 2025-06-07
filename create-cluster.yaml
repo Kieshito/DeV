@@ -1,0 +1,31 @@
+---
+- name: Инициализация кластера
+  hosts: k8s_master
+  become: yes
+  tasks:
+    - name: Генерация токена присоединения
+      command: microk8s add-node --format token
+      register: join_token_raw
+      changed_when: false
+
+    - name: Сохранение чистого токена
+      set_fact:
+        join_token: "{{ join_token_raw.stdout }}"
+      when: join_token_raw.stdout != ""
+
+    - name: Отображение токена для отладки
+      debug:
+        var: join_token
+
+    - name: Создание команды присоединения
+      set_fact:
+        join_command: "microk8s join {{ ansible_host }}:25000/{{ join_token }}"
+      when: join_token is defined
+
+- name: Присоединение рабочих узлов
+  hosts: k8s_workers
+  become: yes
+  tasks:
+    - name: Присоединение к кластеру
+      command: "{{ hostvars['k8s-master'].join_command }}"
+      when: hostvars['k8s-master'].join_command is defined

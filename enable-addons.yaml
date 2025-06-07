@@ -1,0 +1,14 @@
+---
+- name: Активация аддонов MicroK8s
+  hosts: k8s_master
+  become: yes
+  tasks:
+    - name: Включение необходимых аддонов
+      command: "microk8s enable {{ item }}"
+      loop:
+        - dashboard
+        - dns
+        - ingress
+        - storage
+      register: addon_result
+      changed_when: "'is already enabled' not in addon_result.stdout"

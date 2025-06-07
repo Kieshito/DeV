@@ -1,0 +1,9 @@
+---
+- name: Создание Namespace
+  hosts: k8s_master
+  become: yes
+  tasks:
+    - name: Создание неймспейса lab-ns
+      command: microk8s kubectl create namespace lab-ns
+      args:
+        creates: /var/snap/microk8s/common/var/lib/kubelet/namespaces/lab-ns
